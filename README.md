@@ -4,8 +4,6 @@ Go-paste is a small Go-based application which functions as a pastebin. It is de
 ## Installation
 ```
 export GOPATH=/some/absolute/path
-go get gopkg.in/redis.v3
-go get github.com/r3boot/rlib
 go get github.com/r3boot/go-paste
 cd ${GOPATH}/src/github.com/r3boot/go-paste
 make
