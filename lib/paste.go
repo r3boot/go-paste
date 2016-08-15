@@ -35,8 +35,6 @@ func (p *Paste) Save() (hash_s string, err error) {
 		return
 	}
 
-	Log.Debug("Saving paste")
-
 	// Generate random seed for this paste
 	seed = make([]byte, SEED_SIZE)
 	if _, err = rand.Read(seed); err != nil {
