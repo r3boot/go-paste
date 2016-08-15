@@ -1,4 +1,5 @@
 TARGET = go-paste
+UTIL = gp
 
 VERSION = latest
 ACI = ${TARGET}-${VERSION}-amd64.aci
@@ -8,7 +9,7 @@ INSTALL_DIR = ./installed
 PREFIX = /usr/local
 
 
-all: ${TARGET}
+all: ${TARGET} ${UTIL}
 
 ${TARGET}:
 	[[ -d "${BUILD_DIR}" ]] || mkdir -vp ${BUILD_DIR}
@@ -18,11 +19,16 @@ ${TARGET}:
 	install -o root -g root -m 0755 files/build.sh ${BUILD_DIR}/build.sh
 	rkt-builder
 
+${UTIL}:
+	[[ -d "${BUILD_DIR}" ]] || mkdir -vp ${BUILD_DIR}
+	go build -v -o ${BUILD_DIR}/gp gp.go
+
 ${ACI}:
 	./scripts/build_aci.sh ${VERSION}
 
 install:
 	rkt fetch --insecure-options=image ${BUILD_DIR}/${ACI}
+	install -o root -g root -m 0755 ${BUILD_DIR}/${UTIL} /usr/local/bin/${UTIL}
 
 clean:
 	[[ -d "${BUILD_DIR}" ]] && rm -rvf ${BUILD_DIR} || true
