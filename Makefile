@@ -8,7 +8,7 @@ INSTALL_DIR = ./installed
 PREFIX = /usr/local
 
 
-all: ${TARGET} ${ACI}
+all: ${TARGET}
 
 ${TARGET}:
 	[[ -d "${BUILD_DIR}" ]] || mkdir -vp ${BUILD_DIR}
