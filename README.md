@@ -30,5 +30,10 @@ Usage of go-paste:
     	Template to use (default "/usr/share/go-paste.html")
 ```
 
+## Demo
+A live demo of this software, running inside of an rkt container, can be seen on the URL below:
+
+[paste.as65342.net](https://paste.as65342.net)
+
 ## Credits
 This pastebin is heavily inspired by [maze.io/paste](https://maze.io/paste), hosted by [tehmaze](https://github.com/tehmaze).
