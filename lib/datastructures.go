@@ -21,7 +21,6 @@ type Paste struct {
 }
 
 type NewPaste struct {
-	Title               string
-	ExpiryOptions       []string
-	DefaultExpiryOption string
+	Title         string
+	ExpiryOptions []string
 }

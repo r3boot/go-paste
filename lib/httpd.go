@@ -28,6 +28,18 @@ const DEFAULT_EXPIRY_OPTION string = "1d"
 
 const PASTE_PREFIX = "/p/"
 
+func response(w http.ResponseWriter, r *http.Request, msg string) {
+	var srcip string
+
+	srcip = r.Header.Get("X-Forwarded-For")
+	if srcip == "" {
+		srcip = r.RemoteAddr
+	}
+
+	Log.Info("[" + srcip + "]: " + msg)
+	io.WriteString(w, msg)
+}
+
 func viewPaste(w http.ResponseWriter, r *http.Request) {
 	var err error
 	var hash string
@@ -36,12 +48,12 @@ func viewPaste(w http.ResponseWriter, r *http.Request) {
 	hash = r.URL.Path[len(PASTE_PREFIX):]
 
 	if hash == "" {
-		io.WriteString(w, "No such hash")
+		response(w, r, "No such hash")
 		return
 	}
 
 	if paste, err = LoadPaste(hash); err != nil {
-		io.WriteString(w, "No such hash")
+		response(w, r, "No such hash")
 		return
 	}
 
@@ -56,35 +68,41 @@ func newPaste(w http.ResponseWriter, r *http.Request) {
 	var paste *Paste
 	var hash_path string
 	var duration time.Duration
+	var srcip string
+
+	srcip = r.Header.Get("X-Forwarded-For")
+	if srcip == "" {
+		srcip = r.RemoteAddr
+	}
 
 	if r.Method == "GET" {
 		if fs, err = os.Stat(Config.Template); err != nil {
-			Log.Warning("Cannot find template")
+			response(w, r, "Cannot find template: "+Config.Template)
 			return
 		}
 
 		if fs.IsDir() {
-			Log.Warning(Config.Template + " is a directory")
+			response(w, r, Config.Template+" is a directory")
 			return
 		}
 
 		if t, err = template.ParseFiles(Config.Template); err != nil {
-			Log.Warning("Failed to load template: " + err.Error())
+			response(w, r, "Failed to load template: "+err.Error())
 			return
 		}
 
 		p = &NewPaste{
-			Title:               Config.Title,
-			ExpiryOptions:       DEFAULT_EXPIRY_OPTIONS,
-			DefaultExpiryOption: DEFAULT_EXPIRY_OPTION,
+			Title:         Config.Title,
+			ExpiryOptions: DEFAULT_EXPIRY_OPTIONS,
 		}
 
 		t.Execute(w, p)
-		Log.Debug("Served page on " + r.URL.Path)
+		Log.Info("[" + srcip + "]: 200 " + r.URL.Path)
 	} else if r.Method == "POST" {
 		duration, err = time.ParseDuration(r.PostFormValue("expire"))
 		if err != nil {
-			Log.Warning("Failed to parse duration")
+			Log.Warning("Failed to parse duration: " + r.PostFormValue("expire"))
+			io.WriteString(w, "Failed to parse duration: "+r.PostFormValue("expire"))
 			return
 		}
 
@@ -97,7 +115,7 @@ func newPaste(w http.ResponseWriter, r *http.Request) {
 
 		hash_path = "/p/" + paste.Hash
 		http.Redirect(w, r, hash_path, 301)
-		Log.Debug("Redirected to " + hash_path)
+		Log.Info("[" + srcip + "]: 301 " + hash_path)
 	}
 }
 

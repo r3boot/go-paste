@@ -39,25 +39,4 @@ func init() {
 
 func main() {
 	lib.RunServer()
-
-	/*
-		var err error
-		var p *lib.Paste
-		var duration time.Duration
-
-		if duration, err = time.ParseDuration("20m"); err != nil {
-			Log.Fatal("Failed to parse expiration: " + err.Error())
-		}
-
-		p = &lib.Paste{
-			Content:    []byte("Bla die bla die bla"),
-			Expiration: duration,
-		}
-		if err = p.Save(); err != nil {
-			Log.Fatal(err)
-		}
-
-		lib.LoadPaste("b6d7b98913c09b70d290b88159aa29108d630d86")
-	*/
-
 }
