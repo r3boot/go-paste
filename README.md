@@ -31,7 +31,7 @@ Usage of go-paste:
 ```
 
 ## Demo
-A live demo of this software, running inside of an rkt container, can be seen on the URL below:
+A live demo of this software, running in a rkt container, can be seen on the URL below:
 
 [paste.as65342.net](https://paste.as65342.net)
 
