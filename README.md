@@ -31,4 +31,4 @@ Usage of go-paste:
 ```
 
 ## Credits
-This pastebin is inspired by [maze.io/paste](https://maze.io/paste), hosted by [tehmaze](https://github.com/tehmaze).
+This pastebin is heavily inspired by [maze.io/paste](https://maze.io/paste), hosted by [tehmaze](https://github.com/tehmaze).
