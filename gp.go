@@ -20,8 +20,11 @@ const PASTE_MAX_SIZE int64 = 1073741824
 const PASTE_PREFIX string = "/p/"
 
 var debug = flag.Bool("D", D_DEBUG, "Enable debug output")
-var pastebin = flag.String("u", D_URL, "URL to post requests to")
-var expiry = flag.String("e", D_EXPIRY, "When to expire paste")
+var cli_pastebin = flag.String("u", D_URL, "URL to post requests to")
+var cli_expiry = flag.String("e", D_EXPIRY, "When to expire paste")
+
+var pastebin string
+var expiry string
 
 var Log logger.Log
 
@@ -84,8 +87,23 @@ func readStdin() (content []byte, err error) {
 func init() {
 	var err error
 	var fi os.FileInfo
+	var value string
 
 	flag.Parse()
+
+	pastebin = *cli_pastebin
+	if pastebin == D_URL {
+		if value = os.Getenv("GP_URL"); value != "" {
+			pastebin = value
+		}
+	}
+
+	expiry = *cli_expiry
+	if expiry == D_EXPIRY {
+		if value = os.Getenv("GP_EXPIRY"); value != "" {
+			expiry = value
+		}
+	}
 
 	Log.UseDebug = *debug
 	Log.UseVerbose = *debug
@@ -121,15 +139,15 @@ func main() {
 
 	values = url.Values{}
 	values.Add("content", string(content))
-	values.Add("expire", *expiry)
+	values.Add("expire", expiry)
 
-	if resp, err = client.PostForm(*pastebin, values); err != nil {
+	if resp, err = client.PostForm(pastebin, values); err != nil {
 		Log.Fatal("main -> client.PostForm() failed: " + err.Error())
 	}
 
 	if resp.StatusCode == 301 {
 		hash = resp.Header["Location"][0][len(PASTE_PREFIX):]
-		fmt.Printf(*pastebin + "/p/" + hash + "\n")
+		fmt.Printf(pastebin + "/p/" + hash + "\n")
 	} else {
 		Log.Fatal("main -> resp.StatusCode != 301: " + resp.Status)
 	}

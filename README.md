@@ -41,10 +41,13 @@ Usage of gp:
     	When to expire paste (default "12h")
   -u string
     	URL to post requests to (default "http://localhost:8080")
-$ cat somefile | gp -u https://paste.as65342.net
-https://paste.as65342.net/p/db14728a6185ca489095b791b1f40faa0d932ab5
+$ cat somefile | gp
+http://localhost:8080/p/db14728a6185ca489095b791b1f40faa0d932ab5
 $ gp -u https://paste.as65342.net somefile
 https://paste.as65342.net/p/5cee9bc0c93784a8de492818da3123d4995980f9
+$ export GP_URL="https://paste.as65342.net"
+$ export GP_EXPIRY="1m"
+$ cat anotherfile | gp
 ```
 
 ## Demo
