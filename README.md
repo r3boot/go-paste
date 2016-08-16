@@ -48,6 +48,7 @@ https://paste.as65342.net/p/5cee9bc0c93784a8de492818da3123d4995980f9
 $ export GP_URL="https://paste.as65342.net"
 $ export GP_EXPIRY="1m"
 $ cat anotherfile | gp
+https://paste.as65342.net/p/cb99417c67825314f9ebd51f308286235c13142b
 ```
 
 ## Demo
