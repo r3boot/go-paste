@@ -11,6 +11,7 @@ make install
 ```
 
 ## Usage
+The server side can be configured using commandline parameters, as described below:
 ```
 Usage of go-paste:
   -D	Enable debug output
@@ -28,6 +29,22 @@ Usage of go-paste:
     	Password used to connect to redis
   -t string
     	Template to use (default "/usr/share/go-paste.html")
+```
+
+The client either reads from stdin or the first file specified on the commandline, and posts the content of that file to a pastebin of your choice:
+
+```
+$ gp -h
+Usage of gp:
+  -D	Enable debug output
+  -e string
+    	When to expire paste (default "12h")
+  -u string
+    	URL to post requests to (default "http://localhost:8080")
+$ cat somefile | gp -u https://paste.as65342.net
+https://paste.as65342.net/p/db14728a6185ca489095b791b1f40faa0d932ab5
+$ gp -u https://paste.as65342.net somefile
+https://paste.as65342.net/p/5cee9bc0c93784a8de492818da3123d4995980f9
 ```
 
 ## Demo
