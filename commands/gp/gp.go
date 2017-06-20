@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/r3boot/go-paste/lib"
 	"io"
+	"time"
 	"net/http"
 	"net/url"
 	"os"
@@ -140,8 +141,21 @@ func main() {
 		client http.Client
 		values url.Values
 		resp   *http.Response
+		duration time.Duration
 		hash   string
 	)
+
+	if duration, err = time.ParseDuration(expiry); err != nil {
+		Log.Error("Failed to parse duration: " + err.Error())
+	}
+
+	if duration < lib.EXPIRE_MIN {
+		Log.Error("Duration needs to be larger then 1 minute")
+	}
+
+	if duration > lib.EXPIRE_MAX {
+		Log.Error("Duration needs to be smaller then 60 days")
+	}
 
 	client = http.Client{}
 
@@ -150,13 +164,13 @@ func main() {
 	values.Add("expire", expiry)
 
 	if resp, err = client.PostForm(pastebin, values); err != nil {
-		Log.Error("main -> client.PostForm() failed: " + err.Error())
+		Log.Error("Failed to post form: " + err.Error())
 	}
 
 	if resp.StatusCode == 301 {
 		hash = resp.Header["Location"][0][len(PASTE_PREFIX):]
 		fmt.Printf(pastebin + "/p/" + hash + "\n")
 	} else {
-		Log.Error("main -> resp.StatusCode != 301: " + resp.Status)
+		Log.Error("Received a non 301 return code from pastebin: " + resp.Status)
 	}
 }

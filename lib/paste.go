@@ -8,7 +8,6 @@ import (
 	"errors"
 	"gopkg.in/redis.v3"
 	"hash"
-	"time"
 )
 
 // Size of the per-hash seed
@@ -31,12 +30,12 @@ func (p *Paste) Save() (hash_s string, err error) {
 		return
 	}
 
-	if p.Expiration < 1*time.Minute {
+	if p.Expiration < EXPIRE_MIN {
 		err = errors.New("Expiration needs to be larger then 1 minute")
 		return
 	}
 
-	if p.Expiration > 1440*time.Hour {
+	if p.Expiration > EXPIRE_MAX {
 		err = errors.New("Expiration needs to be smaller then 60 days")
 	}
 
