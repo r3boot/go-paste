@@ -41,7 +41,8 @@ $ gp -h
 Usage of gp:
   -D	Enable debug output
   -e string
-    	When to expire paste (default "12h")
+    	When to expire paste (default "1h")
+  -o Open the new url in a browser
   -u string
     	URL to post requests to (default "http://localhost:8080")
 $ cat somefile | gp
@@ -50,9 +51,11 @@ $ gp -u https://paste.as65342.net somefile
 https://paste.as65342.net/p/5cee9bc0c93784a8de492818da3123d4995980f9
 $ export GP_URL="https://paste.as65342.net"
 $ export GP_EXPIRY="1m"
+$ export GP_OPEN_URL="y"
 $ cat anotherfile | gp
 https://paste.as65342.net/p/cb99417c67825314f9ebd51f308286235c13142b
 ```
+
 
 ## Demo
 A live demo of this software, running in a rkt container, can be seen on the URL below:

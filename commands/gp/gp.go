@@ -7,16 +7,19 @@ import (
 	"fmt"
 	"github.com/r3boot/go-paste/lib"
 	"io"
-	"time"
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
+	"runtime"
+	"time"
 )
 
 const (
 	D_DEBUG        bool   = false
 	D_URL          string = "http://localhost:8080"
-	D_EXPIRY       string = "12h"
+	D_EXPIRY       string = "1h"
+	D_OPEN_URL     bool   = false
 	PASTE_MAX_SIZE int64  = 1073741824
 	PASTE_PREFIX   string = "/p/"
 )
@@ -25,8 +28,10 @@ var (
 	debug        = flag.Bool("D", D_DEBUG, "Enable debug output")
 	cli_pastebin = flag.String("u", D_URL, "URL to post requests to")
 	cli_expiry   = flag.String("e", D_EXPIRY, "When to expire paste")
+	cli_open_url = flag.Bool("o", D_OPEN_URL, "Open the new url in a browser")
 	pastebin     string
 	expiry       string
+	open_url     bool
 	Log          lib.Log
 	content      []byte
 )
@@ -112,6 +117,34 @@ func init() {
 		}
 	}
 
+	open_url = *cli_open_url
+	if open_url == D_OPEN_URL {
+		if value = os.Getenv("GP_OPEN_URL"); value != "" {
+			switch value {
+			case "y":
+				{
+					open_url = true
+				}
+			case "Y":
+				{
+					open_url = true
+				}
+			case "yes":
+				{
+					open_url = true
+				}
+			case "1":
+				{
+					open_url = true
+				}
+			default:
+				{
+					open_url = false
+				}
+			}
+		}
+	}
+
 	Log.UseDebug = *debug
 	Log.UseVerbose = *debug
 	Log.UseTimestamp = false
@@ -137,12 +170,16 @@ func init() {
 
 func main() {
 	var (
-		err    error
-		client http.Client
-		values url.Values
-		resp   *http.Response
-		duration time.Duration
-		hash   string
+		err         error
+		client      http.Client
+		values      url.Values
+		resp        *http.Response
+		duration    time.Duration
+		hash        string
+		responseURL string
+		cmd         *exec.Cmd
+		opener      string
+		output      []byte
 	)
 
 	if duration, err = time.ParseDuration(expiry); err != nil {
@@ -173,8 +210,33 @@ func main() {
 
 	if resp.StatusCode == http.StatusMovedPermanently {
 		hash = resp.Header["Location"][0][len(PASTE_PREFIX):]
-		fmt.Printf(pastebin + "/p/" + hash + "\n")
+		responseURL = pastebin + "/p/" + hash
+		fmt.Printf(responseURL + "\n")
+
+		if open_url {
+			switch runtime.GOOS {
+			case "linux":
+				{
+					opener = "xdg-open"
+				}
+			case "darwin":
+				{
+					opener = "open"
+				}
+			default:
+				{
+					Log.Error("Open functionality not supported on " + runtime.GOOS)
+				}
+			}
+
+			cmd = exec.Command(opener, responseURL)
+			if output, err = cmd.CombinedOutput(); err != nil {
+				Log.Warn(string(output))
+				Log.Error("Failed to run " + opener + ": " + err.Error())
+			}
+		}
 	} else {
 		Log.Error("Received an invalid return code from pastebin: " + resp.Status)
 	}
+
 }
