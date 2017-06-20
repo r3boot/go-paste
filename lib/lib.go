@@ -1,16 +1,15 @@
 package lib
 
 import (
-	"github.com/r3boot/rlib/logger"
 	"gopkg.in/redis.v3"
 )
 
-var Log logger.Log
+var log Log
 var Config *AppConfig
 var Redis *redis.Client
 
-func Setup(l logger.Log, c *AppConfig) {
-	Log = l
+func Setup(l Log, c *AppConfig) {
+	log = l
 	Config = c
 
 	Redis = redis.NewClient(&redis.Options{

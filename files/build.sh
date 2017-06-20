@@ -6,7 +6,6 @@ apk add git go ca-certificates
 # Configure go
 export GOPATH=/workspace
 go get -v gopkg.in/redis.v3
-go get -v github.com/r3boot/rlib
 
 # Build software
 cd ${GOPATH}/src/github.com/r3boot/go-paste \

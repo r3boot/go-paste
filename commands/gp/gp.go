@@ -5,35 +5,37 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/r3boot/rlib/logger"
+	"github.com/r3boot/go-paste/lib"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 )
 
-const D_DEBUG bool = false
-const D_URL string = "http://localhost:8080"
-const D_EXPIRY string = "12h"
+const (
+	D_DEBUG        bool   = false
+	D_URL          string = "http://localhost:8080"
+	D_EXPIRY       string = "12h"
+	PASTE_MAX_SIZE int64  = 1073741824
+	PASTE_PREFIX   string = "/p/"
+)
 
-const PASTE_MAX_SIZE int64 = 1073741824
-const PASTE_PREFIX string = "/p/"
-
-var debug = flag.Bool("D", D_DEBUG, "Enable debug output")
-var cli_pastebin = flag.String("u", D_URL, "URL to post requests to")
-var cli_expiry = flag.String("e", D_EXPIRY, "When to expire paste")
-
-var pastebin string
-var expiry string
-
-var Log logger.Log
-
-var content []byte
+var (
+	debug        = flag.Bool("D", D_DEBUG, "Enable debug output")
+	cli_pastebin = flag.String("u", D_URL, "URL to post requests to")
+	cli_expiry   = flag.String("e", D_EXPIRY, "When to expire paste")
+	pastebin     string
+	expiry       string
+	Log          lib.Log
+	content      []byte
+)
 
 func readFile(fname string) (content []byte, err error) {
-	var fs os.FileInfo
-	var fd *os.File
-	var bytes_read int
+	var (
+		fs         os.FileInfo
+		fd         *os.File
+		bytes_read int
+	)
 
 	if fs, err = os.Stat(fname); err != nil {
 		err = errors.New("readFile -> os.Stat(fname) failed: " + err.Error())
@@ -66,8 +68,10 @@ func readFile(fname string) (content []byte, err error) {
 }
 
 func readStdin() (content []byte, err error) {
-	var reader *bufio.Reader
-	var num_read int
+	var (
+		reader   *bufio.Reader
+		num_read int
+	)
 
 	reader = bufio.NewReader(os.Stdin)
 	content = make([]byte, 0, PASTE_MAX_SIZE)
@@ -85,9 +89,11 @@ func readStdin() (content []byte, err error) {
 }
 
 func init() {
-	var err error
-	var fi os.FileInfo
-	var value string
+	var (
+		err   error
+		fi    os.FileInfo
+		value string
+	)
 
 	flag.Parse()
 
@@ -112,28 +118,30 @@ func init() {
 
 	fi, err = os.Stdin.Stat()
 	if err != nil {
-		Log.Fatal("main: os.Stdin.Stat() failed: " + err.Error())
+		Log.Error("main: os.Stdin.Stat() failed: " + err.Error())
 	}
 
 	if fi.Mode()&os.ModeNamedPipe == 0 {
 		if len(flag.Args()) == 0 {
-			Log.Fatal("init: Need something to do!")
+			Log.Error("init: Need something to do!")
 		}
 		content, err = readFile(flag.Arg(0))
 	} else {
 		content, err = readStdin()
 	}
 	if err != nil {
-		Log.Fatal(err)
+		Log.Error(err)
 	}
 }
 
 func main() {
-	var err error
-	var client http.Client
-	var values url.Values
-	var resp *http.Response
-	var hash string
+	var (
+		err    error
+		client http.Client
+		values url.Values
+		resp   *http.Response
+		hash   string
+	)
 
 	client = http.Client{}
 
@@ -142,13 +150,13 @@ func main() {
 	values.Add("expire", expiry)
 
 	if resp, err = client.PostForm(pastebin, values); err != nil {
-		Log.Fatal("main -> client.PostForm() failed: " + err.Error())
+		Log.Error("main -> client.PostForm() failed: " + err.Error())
 	}
 
 	if resp.StatusCode == 301 {
 		hash = resp.Header["Location"][0][len(PASTE_PREFIX):]
 		fmt.Printf(pastebin + "/p/" + hash + "\n")
 	} else {
-		Log.Fatal("main -> resp.StatusCode != 301: " + resp.Status)
+		Log.Error("main -> resp.StatusCode != 301: " + resp.Status)
 	}
 }

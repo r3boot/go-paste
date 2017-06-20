@@ -24,9 +24,10 @@ var DEFAULT_EXPIRY_OPTIONS []string = []string{
 	"1Y",
 }
 
-const DEFAULT_EXPIRY_OPTION string = "1d"
-
-const PASTE_PREFIX = "/p/"
+const (
+	DEFAULT_EXPIRY_OPTION string = "1d"
+	PASTE_PREFIX                 = "/p/"
+)
 
 func response(w http.ResponseWriter, r *http.Request, msg string) {
 	var srcip string
@@ -36,7 +37,7 @@ func response(w http.ResponseWriter, r *http.Request, msg string) {
 		srcip = r.RemoteAddr
 	}
 
-	Log.Info("[" + srcip + "]: " + msg)
+	log.Info("[" + srcip + "]: " + msg)
 	io.WriteString(w, msg)
 }
 
@@ -97,11 +98,11 @@ func newPaste(w http.ResponseWriter, r *http.Request) {
 		}
 
 		t.Execute(w, p)
-		Log.Info("[" + srcip + "]: 200 " + r.URL.Path)
+		log.Info("[" + srcip + "]: 200 " + r.URL.Path)
 	} else if r.Method == "POST" {
 		duration, err = time.ParseDuration(r.PostFormValue("expire"))
 		if err != nil {
-			Log.Warning("Failed to parse duration: " + r.PostFormValue("expire"))
+			log.Warn("Failed to parse duration: " + r.PostFormValue("expire"))
 			io.WriteString(w, "Failed to parse duration: "+r.PostFormValue("expire"))
 			return
 		}
@@ -115,12 +116,12 @@ func newPaste(w http.ResponseWriter, r *http.Request) {
 
 		hash_path = "/p/" + paste.Hash
 		http.Redirect(w, r, hash_path, 301)
-		Log.Info("[" + srcip + "]: 301 " + hash_path)
+		log.Info("[" + srcip + "]: 301 " + hash_path)
 	}
 }
 
 func serveAsset(w http.ResponseWriter, r *http.Request) {
-	Log.Debug(r.URL.Path)
+	log.Debug(r.URL.Path)
 }
 
 func SetupServer() {
@@ -133,6 +134,6 @@ func RunServer() {
 
 	addr = Config.BindIp + ":" + strconv.Itoa(Config.BindPort)
 
-	Log.Debug("Listening on " + addr)
+	log.Debug("Listening on " + addr)
 	http.ListenAndServe(addr, nil)
 }

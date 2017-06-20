@@ -18,10 +18,10 @@ acbuild --debug annotation add author "Lex van Roon <r3boot@r3blog.nl>"
 acbuild --debug copy build/machine-id /etc/machine-id
 acbuild --debug copy files/resolv.conf /etc/resolv.conf
 acbuild --debug copy files/repositories /etc/apk/repositories
-acbuild --debug run -- apk update
-acbuild --debug run -- apk upgrade
+acbuild --debug run apk update
+acbuild --debug run apk upgrade
 acbuild --debug copy build/src/github.com/r3boot/go-paste/build/go-paste /usr/sbin/go-paste
 acbuild --debug copy templates/index.html /usr/share/go-paste.html
 acbuild --debug set-exec /usr/sbin/go-paste
-acbuild --debug write ./build/go-paste-${VERSION}-amd64.aci
+acbuild --debug write --overwrite ./build/go-paste-${VERSION}-amd64.aci
 acbuild end
