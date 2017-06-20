@@ -158,6 +158,9 @@ func main() {
 	}
 
 	client = http.Client{}
+	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	}
 
 	values = url.Values{}
 	values.Add("content", string(content))
@@ -166,11 +169,12 @@ func main() {
 	if resp, err = client.PostForm(pastebin, values); err != nil {
 		Log.Error("Failed to post form: " + err.Error())
 	}
+	defer resp.Body.Close()
 
-	if resp.StatusCode == 301 {
+	if resp.StatusCode == http.StatusMovedPermanently {
 		hash = resp.Header["Location"][0][len(PASTE_PREFIX):]
 		fmt.Printf(pastebin + "/p/" + hash + "\n")
 	} else {
-		Log.Error("Received a non 301 return code from pastebin: " + resp.Status)
+		Log.Error("Received an invalid return code from pastebin: " + resp.Status)
 	}
 }
