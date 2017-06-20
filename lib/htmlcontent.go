@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+package lib
+
+const TEMPLATE_DATA string = `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -59,20 +61,18 @@ h1 {
       <form name="newPasteForm" method="post">
         <textarea tabindex="1" class="content" name="content" columns=80 rows=25 spellcheck="false"></textarea>
         <div class="controls">
-          Lifetime: 
+          Lifetime:
           <select tabindex="3" name="expire">
-            {{ range $key := .ExpiryOptions }}
-            {{ if eq $key "1h" }}
-            <option value="{{ $key }}" selected>{{ $key }}</option>
-            {{ else }}
-            <option value="{{ $key }}">{{ $key }}</option>
-            {{ end }}
-            {{ end }}
+					  <option value="5m">5 minutes</option>
+					  <option value="1h" selected>1 hour</option>
+					  <option value="4h">4 hours</option>
+					  <option value="24h">1 day</option>
+					  <option value="168h">1 week</option>
+					  <option value="720h">30 days</option>
           </select>
-          Or specify a manual value: <input tabindex="4" type="text" class="manual" name="expire_manual"></input>
-          <input tabindex="2" class="submit" type="submit"></input>
+          <input tabindex="2" class="submit" type="submit" value="Create paste"></input>
         </div>
       </form>
     </div>
   </body>
-</html>
+</html>`

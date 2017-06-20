@@ -4,9 +4,11 @@ import (
 	"gopkg.in/redis.v3"
 )
 
-var log Log
-var Config *AppConfig
-var Redis *redis.Client
+var (
+	log    Log
+	Config *AppConfig
+	Redis  *redis.Client
+)
 
 func Setup(l Log, c *AppConfig) {
 	log = l

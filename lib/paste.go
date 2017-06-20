@@ -6,7 +6,9 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
+	"gopkg.in/redis.v3"
 	"hash"
+	"time"
 )
 
 // Size of the per-hash seed
@@ -16,18 +18,26 @@ const SEED_SIZE int = 8
 const REDIS_KEY string = "net.as65342.go-paste"
 
 func (p *Paste) Save() (hash_s string, err error) {
-	var hash hash.Hash
-	var seed []byte
-	var rkey string
+	var (
+		hash     hash.Hash
+		seed     []byte
+		rkey     string
+		rcontent string
+		result   *redis.StatusCmd
+	)
 
 	if p.Hash != "" {
 		err = errors.New("Paste already has a hash: " + p.Hash)
 		return
 	}
 
-	if p.Expiration.String() == "" {
-		err = errors.New("Expiration cannot be empty")
+	if p.Expiration < 1*time.Minute {
+		err = errors.New("Expiration needs to be larger then 1 minute")
 		return
+	}
+
+	if p.Expiration > 1440*time.Hour {
+		err = errors.New("Expiration needs to be smaller then 60 days")
 	}
 
 	if Redis == nil {
@@ -49,8 +59,12 @@ func (p *Paste) Save() (hash_s string, err error) {
 	p.Hash = hex.EncodeToString(hash.Sum(nil))
 
 	rkey = REDIS_KEY + "." + p.Hash
+	rcontent = base64.StdEncoding.EncodeToString(p.Content)
 
-	Redis.Set(rkey, base64.StdEncoding.EncodeToString(p.Content), p.Expiration)
+	if result = Redis.Set(rkey, rcontent, p.Expiration); result.Err() != nil {
+		err = errors.New("Failed to write new hash: " + result.Err().Error())
+		return
+	}
 
 	hash_s = p.Hash
 
@@ -58,19 +72,20 @@ func (p *Paste) Save() (hash_s string, err error) {
 }
 
 func LoadPaste(hash string) (p *Paste, err error) {
-	var rkey string
-	var value string
-	var content []byte
+	var (
+		rkey    string
+		content []byte
+		result  *redis.StringCmd
+	)
 
 	rkey = REDIS_KEY + "." + hash
 
-	value = Redis.Get(rkey).Val()
-	if value == "" {
-		err = errors.New("No such id: " + hash)
+	if result = Redis.Get(rkey); result.Err() != nil {
+		err = errors.New("Failed to retrieve paste: " + result.Err().Error())
 		return
 	}
 
-	if content, err = base64.StdEncoding.DecodeString(value); err != nil {
+	if content, err = base64.StdEncoding.DecodeString(result.Val()); err != nil {
 		err = errors.New("Failed to decode base64: " + err.Error())
 		return
 	}

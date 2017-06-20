@@ -11,7 +11,6 @@ type AppConfig struct {
 	RedisPasswd string
 	RedisDB     int64
 	Title       string
-	Template    string
 }
 
 type Paste struct {
@@ -22,5 +21,5 @@ type Paste struct {
 
 type NewPaste struct {
 	Title         string
-	ExpiryOptions []string
+	ExpiryOptions map[string]string
 }

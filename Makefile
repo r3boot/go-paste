@@ -29,7 +29,7 @@ ${ACI}:
 	rkt-builder
 	./scripts/build_aci.sh ${VERSION}
 
-install:
+install-aci:
 	rkt fetch --insecure-options=image ${BUILD_DIR}/${ACI}
 	install -o root -g root -m 0755 ${BUILD_DIR}/${UTIL} /usr/local/bin/${UTIL}
 
