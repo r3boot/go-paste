@@ -232,7 +232,6 @@ func main() {
 			cmd = exec.Command(opener, responseURL)
 			if output, err = cmd.CombinedOutput(); err != nil {
 				Log.Warn(string(output))
-				Log.Error("Failed to run " + opener + ": " + err.Error())
 			}
 		}
 	} else {
