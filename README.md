@@ -1,12 +1,17 @@
 ## Introduction
 Go-paste is a small Go-based application which functions as a pastebin. It is designed to be as simple as possible, and consists of a single binary together with a HTML template, and redis to store the paste data in. It features configurable paste expiry based on [time/duration](https://golang.org/pkg/time/).
 
-## Installation
+## Building
 ```
 export GOPATH=/some/absolute/path
 go get github.com/r3boot/go-paste
 cd ${GOPATH}/src/github.com/r3boot/go-paste
 make
+```
+
+## Installation
+To install go-paste and the gp utility locally, enter the following commands:
+```
 make install
 ```
 
@@ -27,8 +32,6 @@ Usage of go-paste:
     	Redis DB to connect to
   -rp string
     	Password used to connect to redis
-  -t string
-    	Template to use (default "/usr/share/go-paste.html")
 ```
 
 The client either reads from stdin or the first file specified on the commandline, and posts the content of that file to a pastebin of your choice:
