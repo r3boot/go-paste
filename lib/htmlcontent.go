@@ -1,6 +1,6 @@
 package lib
 
-const TEMPLATE_DATA string = `<!DOCTYPE html>
+const templateData string = `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8">

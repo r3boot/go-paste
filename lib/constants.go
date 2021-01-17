@@ -5,6 +5,6 @@ import (
 )
 
 const (
-	EXPIRE_MIN time.Duration = 1 * time.Minute  // 1 minute
-	EXPIRE_MAX time.Duration = 1440 * time.Hour // 60 days
+	MinimumExpiry time.Duration = 1 * time.Minute  // 1 minute
+	MaximumExpiry time.Duration = 1440 * time.Hour // 60 days
 )

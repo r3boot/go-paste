@@ -16,19 +16,19 @@ import (
 )
 
 const (
-	D_DEBUG        bool   = false
-	D_URL          string = "http://localhost:8080"
-	D_EXPIRY       string = "1h"
-	D_OPEN_URL     bool   = false
-	PASTE_MAX_SIZE int64  = 1073741824
-	PASTE_PREFIX   string = "/p/"
+	debugDefaultValue        bool   = false
+	urlDefaultValue          string = "http://localhost:8080"
+	expiryDefaultValue       string = "1h"
+	openUrlDefaultValue     bool   = false
+	maxPasteSize int64  = 1073741824
+	pastePrefix   string = "/p/"
 )
 
 var (
-	debug        = flag.Bool("D", D_DEBUG, "Enable debug output")
-	cli_pastebin = flag.String("u", D_URL, "URL to post requests to")
-	cli_expiry   = flag.String("e", D_EXPIRY, "When to expire paste")
-	cli_open_url = flag.Bool("o", D_OPEN_URL, "Open the new url in a browser")
+	debug        = flag.Bool("D", debugDefaultValue, "Enable debug output")
+	cli_pastebin = flag.String("u", urlDefaultValue, "URL to post requests to")
+	cli_expiry   = flag.String("e", expiryDefaultValue, "When to expire paste")
+	cli_open_url = flag.Bool("o", openUrlDefaultValue, "Open the new url in a browser")
 	pastebin     string
 	expiry       string
 	open_url     bool
@@ -80,7 +80,7 @@ func readStdin() (content []byte, err error) {
 	)
 
 	reader = bufio.NewReader(os.Stdin)
-	content = make([]byte, 0, PASTE_MAX_SIZE)
+	content = make([]byte, 0, maxPasteSize)
 
 	num_read, err = reader.Read(content[:cap(content)])
 	content = content[:num_read]
@@ -104,21 +104,21 @@ func init() {
 	flag.Parse()
 
 	pastebin = *cli_pastebin
-	if pastebin == D_URL {
+	if pastebin == urlDefaultValue {
 		if value = os.Getenv("GP_URL"); value != "" {
 			pastebin = value
 		}
 	}
 
 	expiry = *cli_expiry
-	if expiry == D_EXPIRY {
+	if expiry == expiryDefaultValue {
 		if value = os.Getenv("GP_EXPIRY"); value != "" {
 			expiry = value
 		}
 	}
 
 	open_url = *cli_open_url
-	if open_url == D_OPEN_URL {
+	if open_url == openUrlDefaultValue {
 		if value = os.Getenv("GP_OPEN_URL"); value != "" {
 			switch value {
 			case "y":
@@ -186,11 +186,11 @@ func main() {
 		Log.Error("Failed to parse duration: " + err.Error())
 	}
 
-	if duration < lib.EXPIRE_MIN {
+	if duration < lib.MinimumExpiry {
 		Log.Error("Duration needs to be larger then 1 minute")
 	}
 
-	if duration > lib.EXPIRE_MAX {
+	if duration > lib.MaximumExpiry {
 		Log.Error("Duration needs to be smaller then 60 days")
 	}
 
@@ -209,7 +209,7 @@ func main() {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == http.StatusMovedPermanently {
-		hash = resp.Header["Location"][0][len(PASTE_PREFIX):]
+		hash = resp.Header["Location"][0][len(pastePrefix):]
 		responseURL = pastebin + "/p/" + hash
 		fmt.Printf(responseURL + "\n")
 

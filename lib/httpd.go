@@ -2,16 +2,18 @@ package lib
 
 import (
 	"bytes"
-	"fmt"
 	"html/template"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/handlers"
 )
 
 // Default expiry options
-var DEFAULT_EXPIRY_OPTIONS map[string]string = map[string]string{
+var defaultExpiryOptions map[string]string = map[string]string{
 	"5m":   "5 minutes",
 	"1h":   "1 hour",
 	"4h":   "4 hours",
@@ -21,28 +23,10 @@ var DEFAULT_EXPIRY_OPTIONS map[string]string = map[string]string{
 }
 
 const (
-	DEFAULT_EXPIRY_OPTION string = "1d"
-	PASTE_PREFIX                 = "/p/"
-	TF_CLF                string = "02/Jan/2006:15:04:05 -0700"
+	defaultExpiryOption string = "1d"
+	pastePrefix                = "/p/"
+	clfTimeFormat       string = "02/Jan/2006:15:04:05 -0700"
 )
-
-func httpLog(r *http.Request, code int, size int) {
-	var (
-		srcip   string
-		logline string
-	)
-
-	srcip = r.Header.Get("X-Forwarded-For")
-	if srcip == "" {
-		srcip = r.RemoteAddr
-	}
-
-	logline = srcip + " - - [" + time.Now().Format(TF_CLF) + "] "
-	logline += "\"" + r.Method + " " + r.URL.Path + " " + r.Proto + "\" "
-	logline += strconv.Itoa(code) + " " + strconv.Itoa(size)
-
-	fmt.Println(logline)
-}
 
 func response(w http.ResponseWriter, r *http.Request, msg string) {
 	var srcip string
@@ -64,24 +48,22 @@ func viewPaste(w http.ResponseWriter, r *http.Request) {
 		paste  *Paste
 	)
 
-	hash = r.URL.Path[len(PASTE_PREFIX):]
+	hash = r.URL.Path[len(pastePrefix):]
 
 	if hash == "" {
 		errmsg = "No hash specified"
 		http.Error(w, errmsg, http.StatusNotFound)
-		httpLog(r, http.StatusNotFound, len(errmsg))
 		return
 	}
 
 	if paste, err = LoadPaste(hash); err != nil {
 		errmsg = "No such hash"
 		http.Error(w, errmsg, http.StatusNotFound)
-		httpLog(r, http.StatusNotFound, len(errmsg))
+		log.Error(errmsg + ": " + err.Error())
 		return
 	}
 
 	w.Write(paste.Content)
-	httpLog(r, http.StatusOK, len(paste.Content))
 }
 
 func newPaste(w http.ResponseWriter, r *http.Request) {
@@ -106,38 +88,33 @@ func newPaste(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			errmsg = "No such file or directory"
 			http.Error(w, errmsg, http.StatusNotFound)
-			httpLog(r, http.StatusNotFound, len(errmsg))
 			return
 		}
 
-		if t, err = template.New("index").Parse(TEMPLATE_DATA); err != nil {
+		if t, err = template.New("index").Parse(templateData); err != nil {
 			errmsg = "Failed to parse template"
 			http.Error(w, errmsg, http.StatusInternalServerError)
-			httpLog(r, http.StatusInternalServerError, len(errmsg))
 			log.Error(errmsg + ": " + err.Error())
 		}
 
 		p = &NewPaste{
 			Title:         Config.Title,
-			ExpiryOptions: DEFAULT_EXPIRY_OPTIONS,
+			ExpiryOptions: defaultExpiryOptions,
 		}
 
 		if err = t.Execute(&content, p); err != nil {
 			errmsg = "Failed to render template"
 			http.Error(w, errmsg, http.StatusInternalServerError)
-			httpLog(r, http.StatusInternalServerError, len(errmsg))
 			log.Error(errmsg + ": " + err.Error())
 		}
 
 		w.Write(content.Bytes())
-		httpLog(r, http.StatusOK, content.Len())
 
 	} else if r.Method == "POST" {
 		duration, err = time.ParseDuration(r.PostFormValue("expire"))
 		if err != nil {
 			errmsg = "Failed to parse duration"
 			http.Error(w, errmsg, http.StatusInternalServerError)
-			httpLog(r, http.StatusInternalServerError, len(errmsg))
 			log.Warn(errmsg + ": " + err.Error())
 			return
 		}
@@ -147,17 +124,17 @@ func newPaste(w http.ResponseWriter, r *http.Request) {
 			Expiration: duration,
 		}
 
-		paste.Save()
+		_, err = paste.Save()
+		if err != nil {
+			errmsg = "Failed to save paste"
+			http.Error(w, errmsg, http.StatusInternalServerError)
+			log.Warn(errmsg + ": " + err.Error())
+			return
+		}
 
 		hash_path = "/p/" + paste.Hash
 		http.Redirect(w, r, hash_path, http.StatusMovedPermanently)
-		httpLog(r, http.StatusMovedPermanently, 0)
 	}
-}
-
-func SetupServer() {
-	http.HandleFunc("/p/", viewPaste)
-	http.HandleFunc("/", newPaste)
 }
 
 func RunServer() {
@@ -167,6 +144,10 @@ func RunServer() {
 
 	addr = Config.BindIp + ":" + strconv.Itoa(Config.BindPort)
 
+	http.HandleFunc("/p/", viewPaste)
+	http.HandleFunc("/", newPaste)
+
 	log.Debug("Listening on " + addr)
-	http.ListenAndServe(addr, nil)
+	http.ListenAndServe(addr, handlers.CombinedLoggingHandler(
+		os.Stdout, http.DefaultServeMux))
 }

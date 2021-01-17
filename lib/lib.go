@@ -19,6 +19,4 @@ func Setup(l Log, c *AppConfig) {
 		Password: Config.RedisPasswd,
 		DB:       Config.RedisDB,
 	})
-
-	SetupServer()
 }

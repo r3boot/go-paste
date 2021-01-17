@@ -30,12 +30,12 @@ func (p *Paste) Save() (hash_s string, err error) {
 		return
 	}
 
-	if p.Expiration < EXPIRE_MIN {
+	if p.Expiration < MinimumExpiry {
 		err = errors.New("Expiration needs to be larger then 1 minute")
 		return
 	}
 
-	if p.Expiration > EXPIRE_MAX {
+	if p.Expiration > MaximumExpiry {
 		err = errors.New("Expiration needs to be smaller then 60 days")
 	}
 
