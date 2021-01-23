@@ -8,19 +8,19 @@ def build() {
 }
 
 podTemplate(containers: [
-    containerTemplate(name: 'golang-libc', image: 'golang:latest', ttyEnabled: true, command: 'cat')
-    containerTemplate(name: 'golang-musl', image: 'golang:alpine', ttyEnabled: true, command: 'cat')
+    containerTemplate(name: 'golang_libc', image: 'golang:latest', ttyEnabled: true, command: 'cat')
+    containerTemplate(name: 'golang_musl', image: 'golang:alpine', ttyEnabled: true, command: 'cat')
   ]) {
 
     node(POD_LABEL) {
         stage('Build go-paste') {
             git url: 'ssh://git@gitea.as65342.net:2222/r3boot/go-paste.git'
-            container('golang-libc') {
+            container('golang_libc') {
                 stage('Build binary for libc-amd64') {
                     build()
                 }
             }
-            container('golang-musl') {
+            container('golang_musl') {
                 stage('Build binary for musl-amd64') {
                     build()
                 }
