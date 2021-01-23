@@ -43,7 +43,7 @@ pipeline {
                 }
                 container('golang-musl') {
                     sh """
-                    apk add make
+                    apk add make git
                     mkdir -p /go/src/github.com/r3boot
                     ln -s `pwd` /go/src/github.com/r3boot/go-paste
                     cd /go/src/github.com/r3boot/go-paste && make
