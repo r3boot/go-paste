@@ -14,7 +14,7 @@ podTemplate(containers: [
 
     node(POD_LABEL) {
         stage('Build go-paste') {
-            git url: 'ssh://git@gitea.as65342.net:2222/r3boot/go-paste.git'
+            git url: 'ssh://git@gitea-ssh.develop.svc:2222/r3boot/go-paste.git'
             container('golang-libc') {
                 stage('Build binary for libc-amd64') {
                     sh """
