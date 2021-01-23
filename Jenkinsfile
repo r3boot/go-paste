@@ -33,18 +33,15 @@ pipeline {
 
     stages {
         stage('Build') {
-            git url: 'ssh://git@gitea-ssh.develop.svc:2222/r3boot/go-paste.git'
-            container('golang-libc') {
-                stage('Build binary for libc-amd64') {
+            steps {
+                container('golang-libc') {
                     sh """
                     mkdir -p /go/src/github.com/r3boot
                     ln -s `pwd` /go/src/github.com/r3boot/go-paste
                     cd /go/src/github.com/r3boot/go-paste && make
                     """
                 }
-            }
-            container('golang-musl') {
-                stage('Build binary for musl-amd64') {
+                container('golang-musl') {
                     sh """
                     mkdir -p /go/src/github.com/r3boot
                     ln -s `pwd` /go/src/github.com/r3boot/go-paste
