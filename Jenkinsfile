@@ -8,7 +8,7 @@ def build() {
 }
 
 podTemplate(containers: [
-    containerTemplate(name: 'golang_libc', image: 'golang:latest', ttyEnabled: true, command: 'cat')
+    containerTemplate(name: 'golang_libc', image: 'golang:latest', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'golang_musl', image: 'golang:alpine', ttyEnabled: true, command: 'cat')
   ]) {
 
