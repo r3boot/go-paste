@@ -7,29 +7,32 @@ def build() {
     """
 }
 
-podTemplate(containers: [
-    containerTemplate(name: 'golang-libc', image: 'golang:latest', ttyEnabled: true, command: 'cat'),
-    containerTemplate(name: 'golang-musl', image: 'golang:alpine', ttyEnabled: true, command: 'cat')
-  ]) {
-
-  options {
-      skipDefaultCheckout true
-  }
-
-    node(POD_LABEL) {
-        stage('Preparation') {
-            steps {
-                sh """
-                ssh-keyscan -f ~/.ssh/known_hosts -p 2222 gitea-ssh.develop.svc
-                """
-            }
+pipeline {
+    agent {
+        kubernetes {
+            yaml """
+            apiVersion: v1
+            kind: Pod
+            spec:
+              containers:
+              - name: golang-libc
+                image: golang:latest
+                imagePullPolicy: Always
+                command:
+                - cat
+                tty: true
+              - name: golang-musl
+                image: golang:alpine
+                imagePullPolicy: Always
+                command:
+                - cat
+                tty: true
+            """
         }
-        stage('Checkout') {
-            steps {
-                 checkout scm
-            }
-        }
-        stage('Build go-paste') {
+    }
+
+    stages {
+        stage('Build') {
             git url: 'ssh://git@gitea-ssh.develop.svc:2222/r3boot/go-paste.git'
             container('golang-libc') {
                 stage('Build binary for libc-amd64') {
@@ -50,6 +53,5 @@ podTemplate(containers: [
                 }
             }
         }
-
     }
 }
