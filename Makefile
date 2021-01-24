@@ -16,12 +16,8 @@ dependencies:
 	go get -v ./...
 
 $(TARGETS): $(BUILD_DIR) dependencies
-	ifeq "$(OS_ID)" "debian"
-		go build -v -o $(BUILD_DIR)/$@-libc-amd64 ./cmd/$@/main.go
-	endif
-	ifeq "$(OS_ID)" "alpine"
-		go build -v -o $(BUILD_DIR)/$@-musl-amd64 ./cmd/$@/main.go
-	endif
+	echo $(OS_ID)
+	go build -v -o $(BUILD_DIR)/$@-libc-amd64 ./cmd/$@/main.go
 
 install:
 	install -o root -g root -m 0755 $(BUILD_DIR)/${TARGET} /usr/local/bin/${TARGET}
