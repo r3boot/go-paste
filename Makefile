@@ -16,7 +16,7 @@ dependencies:
 	go get -v ./...
 
 $(TARGETS): $(BUILD_DIR) dependencies
-	echo $(OS_ID)
+	echo ${OS_ID}
 	go build -v -o $(BUILD_DIR)/$@-libc-amd64 ./cmd/$@/main.go
 
 install:
