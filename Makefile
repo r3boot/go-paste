@@ -16,13 +16,16 @@ dependencies:
 	go get -v ./...
 
 $(TARGETS): $(BUILD_DIR) dependencies
-	if [[ "$(OS_ID)" == "debian" ]]; then
-		go build -v -o $(BUILD_DIR)/$@-libc-amd64 ./cmd/$@/main.go
-	elif [[ "$(OS_ID)" == "alpine" ]]; then
-		go build -v -o $(BUILD_DIR)/$@-musl-amd64 ./cmd/$@/main.go
+	ifdef ($(OS_ID)
+		ifeq ($(OS_ID),debian)
+			go build -v -o $(BUILD_DIR)/$@-libc-amd64 ./cmd/$@/main.go
+		endif
+		ifeq ($(OS_ID),alpine)
+			go build -v -o $(BUILD_DIR)/$@-musl-amd64 ./cmd/$@/main.go
+		endif
 	else
-	  	go build -v -o $(BUILD_DIR)/$@ ./cmd/$@/main.go
-	fi
+		go build -v -o $(BUILD_DIR)/$@ ./cmd/$@/main.go
+	endif
 
 install:
 	install -o root -g root -m 0755 $(BUILD_DIR)/${TARGET} /usr/local/bin/${TARGET}
