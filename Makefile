@@ -18,10 +18,9 @@ dependencies:
 $(TARGETS): $(BUILD_DIR) dependencies
 	if [[ "$(OS_ID)" == "debian" ]]; then \
 		go build -v -o $(BUILD_DIR)/$@-libc-amd64 ./cmd/$@/main.go \
-	elif [[ "$(OS_ID)" == "alpine" ]]; then \
+	fi
+	if [[ "$(OS_ID)" == "alpine" ]]; then \
 		go build -v -o $(BUILD_DIR)/$@-musl-amd64 ./cmd/$@/main.go \
-	else \
-	  	go build -v -o $(BUILD_DIR)/$@ ./cmd/$@/main.go \
 	fi
 
 install:
