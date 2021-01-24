@@ -5,7 +5,7 @@ NAMESPACE = as65342
 BUILD_DIR = ./build
 PREFIX    = /usr/local
 
-OS_ID = $(shell awk -F= '/^ID/{ print $2 }' /etc/os-release)
+OS_ID = $(shell awk -F\= '/^ID/{ print $2 }' /etc/os-release)
 
 all: $(TARGETS)
 
