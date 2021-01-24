@@ -1,12 +1,4 @@
 
-def build() {
-    sh """
-    mkdir -p /go/src/github.com/r3boot
-    ln -s `pwd` /go/src/github.com/r3boot/go-paste
-    cd /go/src/github.com/r3boot/go-paste && make
-    """
-}
-
 pipeline {
     agent {
         kubernetes {
